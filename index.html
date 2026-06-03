@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RGB to HEX Converter — Free Online Color Code Converter</title>
+  <meta name="description" content="Convert RGB to HEX color codes instantly. Free online color converter with live preview, color picker, palette recommendations, and two-way conversion (RGB to HEX and HEX to RGB).">
+  <link rel="canonical" href="https://rgbtohexconverter.fyi/">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Colored range sliders */
+    input[type="range"]#sliderR { accent-color: #ef4444; }
+    input[type="range"]#sliderG { accent-color: #22c55e; }
+    input[type="range"]#sliderB { accent-color: #3b82f6; }
+
+    /* Custom slider thumb size */
+    input[type="range"] {
+      height: 8px;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
+
+    /* Color picker styled as large button */
+    #colorPicker {
+      width: 100%;
+      height: 48px;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+    }
+
+    /* Toast animation */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    .toast-in { animation: fadeInUp 0.2s ease-out; }
+    .toast-out { animation: fadeOut 0.3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="https://rgbtohexconverter.fyi/" class="text-lg font-bold text-slate-800 tracking-tight">
+        RGB ↔ HEX
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+
+    <!-- Hero -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">
+        RGB to HEX Converter
+      </h1>
+      <p class="text-slate-500 text-lg">
+        Free online color code converter — instant RGB to HEX and HEX to RGB conversion with live preview.
+      </p>
+    </div>
+
+    <!-- Tool Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 mb-8">
+
+      <!-- Color Preview -->
+      <div class="mb-8">
+        <div id="colorPreview"
+             class="w-full h-48 sm:h-56 rounded-xl flex flex-col items-center justify-center transition-colors duration-150 shadow-inner"
+             style="background-color: rgb(100, 150, 200);">
+          <span id="previewHEX" class="text-2xl sm:text-3xl font-mono font-bold tracking-wider text-white drop-shadow-md">#6496C8</span>
+          <span id="previewRGB" class="text-sm font-mono text-white/80 mt-1 drop-shadow-md">rgb(100, 150, 200)</span>
+        </div>
+      </div>
+
+      <!-- RGB Sliders -->
+      <div class="space-y-5 mb-8">
+        <!-- R Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sliderR" class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> R
+            </label>
+            <input type="number" id="inputR" min="0" max="255" value="100"
+                   class="w-16 text-center text-sm font-mono border border-slate-300 rounded-lg py-1 px-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                   oninput="syncFromNumber()">
+          </div>
+          <input type="range" id="sliderR" min="0" max="255" value="100"
+                 class="w-full" oninput="syncFromSlider()">
+        </div>
+
+        <!-- G Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sliderG" class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> G
+            </label>
+            <input type="number" id="inputG" min="0" max="255" value="150"
+                   class="w-16 text-center text-sm font-mono border border-slate-300 rounded-lg py-1 px-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                   oninput="syncFromNumber()">
+          </div>
+          <input type="range" id="sliderG" min="0" max="255" value="150"
+                 class="w-full" oninput="syncFromSlider()">
+        </div>
+
+        <!-- B Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sliderB" class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> B
+            </label>
+            <input type="number" id="inputB" min="0" max="255" value="200"
+                   class="w-16 text-center text-sm font-mono border border-slate-300 rounded-lg py-1 px-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                   oninput="syncFromNumber()">
+          </div>
+          <input type="range" id="sliderB" min="0" max="255" value="200"
+                 class="w-full" oninput="syncFromSlider()">
+        </div>
+      </div>
+
+      <!-- HEX Output + Input -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+        <div class="flex-1">
+          <div class="text-xs text-slate-400 font-medium uppercase tracking-wide mb-1">HEX Color Code</div>
+          <input type="text" id="hexOutput" value="#6496C8"
+                 placeholder="#6496C8"
+                 class="w-full text-2xl sm:text-3xl font-mono font-bold text-slate-900 tracking-wider bg-transparent border-none outline-none placeholder:text-slate-300 placeholder:font-normal placeholder:tracking-normal"
+                 oninput="syncFromHexInput()">
+          <p class="text-xs text-slate-400 mt-1">You can also paste a HEX code here → it will convert back to RGB instantly</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="copyHEX()"
+                  class="flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 active:scale-95 transition-all">
+            Copy HEX
+          </button>
+          <button onclick="copyRGB()"
+                  class="flex-1 sm:flex-none px-5 py-2.5 bg-white text-indigo-600 text-sm font-semibold rounded-lg border border-indigo-200 hover:bg-indigo-50 active:scale-95 transition-all">
+            Copy RGB
+          </button>
+        </div>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="mb-8">
+        <label class="text-sm font-semibold text-slate-700 block mb-2">🎨 Pick a Color</label>
+        <div class="relative">
+          <input type="color" id="colorPicker" value="#6496C8"
+                 oninput="syncFromPicker()"
+                 class="rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors">
+        </div>
+      </div>
+
+      <!-- Color Palette Recommendations -->
+      <div class="mb-8">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">✨ Color Palettes</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="paletteContainer">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
+      <!-- Color History -->
+      <div class="mb-8" id="historySection">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">🕐 Recent Colors</h3>
+        <div id="historyContainer" class="flex flex-wrap gap-2">
+          <!-- Filled by JS -->
+        </div>
+        <p id="historyEmpty" class="text-sm text-slate-400">Colors you pick or convert will appear here.</p>
+      </div>
+
+      <!-- HEX to RGB (Collapsible - large even when collapsed) -->
+      <div class="border-2 border-dashed border-slate-200 rounded-xl overflow-hidden hover:border-indigo-200 transition-colors">
+        <button onclick="toggleHexToRGB()"
+                id="hexCollapseBtn"
+                class="w-full flex items-center gap-4 px-6 py-5 text-left hover:bg-slate-50 transition-colors">
+          <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+            <svg id="collapseIcon" class="w-5 h-5 text-indigo-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-base font-semibold text-slate-800">HEX to RGB</div>
+            <div class="text-sm text-slate-400">Enter a hex color code to convert it back to RGB values</div>
+          </div>
+        </button>
+        <div id="hexToRGBPanel" class="hidden px-6 pb-5">
+          <div class="flex gap-3">
+            <input type="text" id="hexInput" placeholder="e.g. #ff5733"
+                   class="flex-1 px-4 py-3 text-lg font-mono border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+                   oninput="hexToRGB()">
+            <button onclick="hexToRGB()"
+                    class="px-5 py-3 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 active:scale-95 transition-all flex-shrink-0">
+              Convert
+            </button>
+          </div>
+          <p id="hexError" class="text-sm text-red-500 mt-2 hidden"></p>
+        </div>
+      </div>
+
+    </div><!-- /Tool Card -->
+
+    <!-- Features -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-3xl mb-2">🎨</div>
+        <div class="font-semibold text-slate-800 text-sm">Live Preview</div>
+        <div class="text-xs text-slate-400 mt-1">See your color update in real-time as you adjust the sliders</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-3xl mb-2">📋</div>
+        <div class="font-semibold text-slate-800 text-sm">One-Click Copy</div>
+        <div class="text-xs text-slate-400 mt-1">Copy HEX or RGB values to your clipboard instantly</div>
+      </div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 text-center">
+        <div class="text-3xl mb-2">🔄</div>
+        <div class="font-semibold text-slate-800 text-sm">Two-Way Conversion</div>
+        <div class="text-xs text-slate-400 mt-1">RGB → HEX and HEX → RGB, both directions supported</div>
+      </div>
+    </div>
+
+    <!-- How to Use -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 mb-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-5">How to Use</h2>
+      <div class="space-y-4">
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold flex-shrink-0">1</div>
+          <div>
+            <div class="font-semibold text-slate-800">Adjust the RGB sliders</div>
+            <div class="text-sm text-slate-500 mt-0.5">Drag the Red, Green, and Blue sliders — or type numbers directly — to mix your color. The preview updates instantly.</div>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold flex-shrink-0">2</div>
+          <div>
+            <div class="font-semibold text-slate-800">Copy or paste a HEX code</div>
+            <div class="text-sm text-slate-500 mt-0.5">Click "Copy HEX" or "Copy RGB" to copy the color code. You can also paste any HEX code directly into the HEX field above — the preview and sliders will update automatically.</div>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold flex-shrink-0">3</div>
+          <div>
+            <div class="font-semibold text-slate-800">Try the color picker or palettes</div>
+            <div class="text-sm text-slate-500 mt-0.5">Use the built-in color picker to grab any color from your screen, or pick from our curated color palettes for inspiration.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 mb-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-5">Frequently Asked Questions</h2>
+      <div class="space-y-5">
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">What is a HEX color code?</h3>
+          <p class="text-sm text-slate-500 mt-1">A HEX color code is a 6-digit hexadecimal number used in web design and CSS to represent colors. It starts with a "#" followed by three pairs of characters (00–FF) representing Red, Green, and Blue values. For example, <code class="bg-slate-100 px-1 rounded text-slate-700">#FF5733</code> means R=255, G=87, B=51.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">How do I convert RGB to HEX?</h3>
+          <p class="text-sm text-slate-500 mt-1">Each RGB value (0–255) is converted to a two-digit hexadecimal number, then the three pairs are combined. Red=100 → 64, Green=150 → 96, Blue=200 → C8 — so <code class="bg-slate-100 px-1 rounded text-slate-700">rgb(100, 150, 200)</code> = <code class="bg-slate-100 px-1 rounded text-slate-700">#6496C8</code>. This tool does it instantly as you move the sliders.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">What's the difference between RGB and HEX?</h3>
+          <p class="text-sm text-slate-500 mt-1">Both represent the same thing — a mix of Red, Green, and Blue light. RGB uses decimal numbers like <code class="bg-slate-100 px-1 rounded text-slate-700">rgb(255, 0, 0)</code>, while HEX uses hexadecimal like <code class="bg-slate-100 px-1 rounded text-slate-700">#FF0000</code>. HEX is more common in web design and CSS; RGB is often used in graphic design software.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">Can I convert HEX back to RGB?</h3>
+          <p class="text-sm text-slate-500 mt-1">Yes! Just paste any HEX code (like #ff5733) directly into the HEX field above, and the tool will instantly convert it back to RGB — updating the sliders, preview, and color picker automatically. You can also use the "HEX to RGB" section below for a dedicated conversion panel.</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">Is this tool free to use?</h3>
+          <p class="text-sm text-slate-500 mt-1">Yes, completely free. No ads, no sign-up, no limits. All color conversion happens instantly in your browser — no data is sent to any server.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- More Free Tools -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 mb-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-5">More Free Tools</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <a href="https://jsonformatter.fyi/" target="_blank" rel="noopener noreferrer"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors group">
+          <span class="text-lg">{ }</span>
+          <span class="text-sm font-medium text-slate-700 group-hover:text-indigo-700">JSON Formatter</span>
+        </a>
+        <a href="https://wordcounter.fyi/" target="_blank" rel="noopener noreferrer"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors group">
+          <span class="text-lg">📝</span>
+          <span class="text-sm font-medium text-slate-700 group-hover:text-indigo-700">Word Counter</span>
+        </a>
+        <a href="https://imagetobase64.online/" target="_blank" rel="noopener noreferrer"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors group">
+          <span class="text-lg">🖼️</span>
+          <span class="text-sm font-medium text-slate-700 group-hover:text-indigo-700">Image to Base64</span>
+        </a>
+        <a href="https://uuidgenerator.fyi/" target="_blank" rel="noopener noreferrer"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors group">
+          <span class="text-lg">🆔</span>
+          <span class="text-sm font-medium text-slate-700 group-hover:text-indigo-700">UUID Generator</span>
+        </a>
+        <a href="https://caseconverter.fyi/" target="_blank" rel="noopener noreferrer"
+           class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors group sm:col-span-2">
+          <span class="text-lg">Aa</span>
+          <span class="text-sm font-medium text-slate-700 group-hover:text-indigo-700">Case Converter</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-sm text-slate-400 pb-8">
+      <p>&copy; 2026 RGB to HEX Converter. All rights reserved.</p>
+    </footer>
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg opacity-0 pointer-events-none transition-opacity z-50">
+    Copied!
+  </div>
+
+  <script>
+    // === DOM refs ===
+    const sliderR = document.getElementById('sliderR');
+    const sliderG = document.getElementById('sliderG');
+    const sliderB = document.getElementById('sliderB');
+    const inputR = document.getElementById('inputR');
+    const inputG = document.getElementById('inputG');
+    const inputB = document.getElementById('inputB');
+    const colorPreview = document.getElementById('colorPreview');
+    const previewHEX = document.getElementById('previewHEX');
+    const previewRGB = document.getElementById('previewRGB');
+    const hexOutput = document.getElementById('hexOutput');
+    const colorPicker = document.getElementById('colorPicker');
+    const hexInput = document.getElementById('hexInput');
+    const hexError = document.getElementById('hexError');
+    const toast = document.getElementById('toast');
+
+    // === Color Palettes ===
+    const palettes = [
+      {
+        name: 'Material Reds & Pinks',
+        colors: ['#F44336', '#E91E63', '#FF5722', '#FF9800', '#FFC107']
+      },
+      {
+        name: 'Material Blues & Greens',
+        colors: ['#2196F3', '#3F51B5', '#00BCD4', '#009688', '#4CAF50']
+      },
+      {
+        name: 'Flat UI Classics',
+        colors: ['#1ABC9C', '#2ECC71', '#3498DB', '#9B59B6', '#E74C3C']
+      },
+      {
+        name: 'Modern Web',
+        colors: ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981']
+      },
+      {
+        name: 'Warm Sunset',
+        colors: ['#FF6B6B', '#FF8E53', '#FFD93D', '#FF6B9D', '#C44569']
+      },
+      {
+        name: 'Cool Ocean',
+        colors: ['#0ABDE3', '#10AC84', '#1DD1A1', '#54A0FF', '#5F27CD']
+      },
+      {
+        name: 'Earth Tones',
+        colors: ['#8B6914', '#C8A951', '#D4A76A', '#A0522D', '#6B8E23']
+      },
+      {
+        name: 'Pastel Dreams',
+        colors: ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF']
+      }
+    ];
+
+    // === Init Palette UI ===
+    function buildPalettes() {
+      const container = document.getElementById('paletteContainer');
+      container.innerHTML = palettes.map((p, i) => `
+        <div class="${i >= 4 ? 'hidden sm:block' : ''}">
+          <div class="text-xs text-slate-400 font-medium mb-2">${p.name}</div>
+          <div class="flex gap-2">
+            ${p.colors.map(c => `
+              <button onclick="applyPaletteColor('${c}')"
+                      class="w-10 h-10 rounded-lg border border-slate-200 hover:scale-110 active:scale-95 transition-transform shadow-sm"
+                      style="background-color: ${c};"
+                      title="${c}"></button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+    buildPalettes();
+
+    // === Color History ===
+    const HISTORY_KEY = 'rgbtohex_history';
+    const MAX_HISTORY = 6;
+
+    function getHistory() {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch { return []; }
+    }
+
+    function saveHistory(hex) {
+      let history = getHistory();
+      history = history.filter(h => h !== hex);
+      history.unshift(hex);
+      if (history.length > MAX_HISTORY) history.pop();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      const container = document.getElementById('historyContainer');
+      const emptyMsg = document.getElementById('historyEmpty');
+
+      if (history.length === 0) {
+        container.innerHTML = '';
+        emptyMsg.classList.remove('hidden');
+        return;
+      }
+      emptyMsg.classList.add('hidden');
+      container.innerHTML = history.map(c => `
+        <button onclick="applyPaletteColor('${c}')"
+                class="w-9 h-9 rounded-lg border border-slate-200 hover:scale-110 active:scale-95 transition-transform shadow-sm"
+                style="background-color: ${c};"
+                title="${c}"></button>
+      `).join('');
+    }
+    renderHistory();
+
+    // === Apply a color from palette or history ===
+    window.applyPaletteColor = function(hex) {
+      const rgb = hexToRgbObj(hex);
+      setRGB(rgb.r, rgb.g, rgb.b);
+      updateAll();
+    };
+
+    // === Conversion helpers ===
+    function componentToHex(c) {
+      const hex = c.toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
+    function hexToRgbObj(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      if (hex.length !== 6) return null;
+      return {
+        r: parseInt(hex.substring(0, 2), 16),
+        g: parseInt(hex.substring(2, 4), 16),
+        b: parseInt(hex.substring(4, 6), 16)
+      };
+    }
+
+    function getLuminance(r, g, b) {
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+
+    // === Set RGB values (called by applyPaletteColor, hexToRGB) ===
+    function setRGB(r, g, b) {
+      sliderR.value = r; inputR.value = r;
+      sliderG.value = g; inputG.value = g;
+      sliderB.value = b; inputB.value = b;
+    }
+
+    // === Update everything ===
+    function updateAll() {
+      const r = parseInt(sliderR.value);
+      const g = parseInt(sliderG.value);
+      const b = parseInt(sliderB.value);
+      const hex = rgbToHex(r, g, b);
+      const rgbStr = `rgb(${r}, ${g}, ${b})`;
+      const lum = getLuminance(r, g, b);
+
+      // Color preview
+      colorPreview.style.backgroundColor = rgbStr;
+      previewHEX.textContent = hex;
+      previewRGB.textContent = rgbStr;
+
+      // Text contrast
+      if (lum > 0.55) {
+        previewHEX.className = 'text-2xl sm:text-3xl font-mono font-bold tracking-wider text-slate-800 drop-shadow-sm';
+        previewRGB.className = 'text-sm font-mono text-slate-600 mt-1 drop-shadow-sm';
+      } else {
+        previewHEX.className = 'text-2xl sm:text-3xl font-mono font-bold tracking-wider text-white drop-shadow-md';
+        previewRGB.className = 'text-sm font-mono text-white/80 mt-1 drop-shadow-md';
+      }
+
+      // HEX output
+      hexOutput.value = hex;
+
+      // Color picker
+      colorPicker.value = hex;
+
+      // Save to history (debounced: only save when user finishes interaction)
+      if (window._saveTimeout) clearTimeout(window._saveTimeout);
+      window._saveTimeout = setTimeout(() => {
+        saveHistory(hex);
+        renderHistory();
+      }, 600);
+    }
+
+    // === Sync from slider ===
+    window.syncFromSlider = function() {
+      inputR.value = sliderR.value;
+      inputG.value = sliderG.value;
+      inputB.value = sliderB.value;
+      updateAll();
+    };
+
+    // === Sync from number input ===
+    window.syncFromNumber = function() {
+      const clamp = (v) => Math.max(0, Math.min(255, parseInt(v) || 0));
+      const r = clamp(inputR.value);
+      const g = clamp(inputG.value);
+      const b = clamp(inputB.value);
+      setRGB(r, g, b);
+      updateAll();
+    };
+
+    // === Sync from HEX input field (two-way) ===
+    window.syncFromHexInput = function() {
+      const val = hexOutput.value.trim();
+      if (!val || val === '#') return; // don't clear on partial input
+      const rgb = hexToRgbObj(val);
+      if (rgb) {
+        // Valid HEX: update sliders + preview + picker
+        setRGB(rgb.r, rgb.g, rgb.b);
+        colorPreview.style.backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        hexOutput.value = hex; // normalize display
+        previewHEX.textContent = hex;
+        previewRGB.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        colorPicker.value = hex;
+        const lum = getLuminance(rgb.r, rgb.g, rgb.b);
+        if (lum > 0.55) {
+          previewHEX.className = 'text-2xl sm:text-3xl font-mono font-bold tracking-wider text-slate-800 drop-shadow-sm';
+          previewRGB.className = 'text-sm font-mono text-slate-600 mt-1 drop-shadow-sm';
+        } else {
+          previewHEX.className = 'text-2xl sm:text-3xl font-mono font-bold tracking-wider text-white drop-shadow-md';
+          previewRGB.className = 'text-sm font-mono text-white/80 mt-1 drop-shadow-md';
+        }
+        // Save to history
+        if (window._saveTimeout) clearTimeout(window._saveTimeout);
+        window._saveTimeout = setTimeout(() => {
+          saveHistory(hex);
+          renderHistory();
+        }, 600);
+      }
+    };
+
+    // === Sync from color picker ===
+    window.syncFromPicker = function() {
+      const hex = colorPicker.value;
+      const rgb = hexToRgbObj(hex);
+      if (rgb) {
+        setRGB(rgb.r, rgb.g, rgb.b);
+        updateAll();
+      }
+    };
+
+    // === HEX to RGB ===
+    window.hexToRGB = function() {
+      const val = hexInput.value.trim();
+      if (!val) {
+        hexError.classList.add('hidden');
+        return;
+      }
+      const rgb = hexToRgbObj(val);
+      if (!rgb) {
+        hexError.textContent = 'Invalid HEX code. Use formats like #ff5733, ff5733, or #abc.';
+        hexError.classList.remove('hidden');
+        return;
+      }
+      hexError.classList.add('hidden');
+      setRGB(rgb.r, rgb.g, rgb.b);
+      updateAll();
+    };
+
+    // === HEX to RGB collapse toggle ===
+    window.toggleHexToRGB = function() {
+      const panel = document.getElementById('hexToRGBPanel');
+      const icon = document.getElementById('collapseIcon');
+      const isHidden = panel.classList.contains('hidden');
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        panel.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+      }
+    };
+
+    // === Copy functions ===
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('toast-in');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+          toast.classList.remove('toast-in', 'toast-out');
+        }, 300);
+      }, 1800);
+    }
+
+    window.copyHEX = function() {
+      navigator.clipboard.writeText(hexOutput.value).then(() => {
+        showToast('HEX copied!');
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = hexOutput.value;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('HEX copied!');
+      });
+    };
+
+    window.copyRGB = function() {
+      const r = parseInt(sliderR.value);
+      const g = parseInt(sliderG.value);
+      const b = parseInt(sliderB.value);
+      const rgb = `rgb(${r}, ${g}, ${b})`;
+      navigator.clipboard.writeText(rgb).then(() => {
+        showToast('RGB copied!');
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = rgb;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('RGB copied!');
+      });
+    };
+
+    // === Keyboard shortcuts for sliders ===
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const step = e.shiftKey ? 10 : 1;
+          this.value = Math.min(255, parseInt(this.value) + step);
+          syncFromSlider();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const step = e.shiftKey ? 10 : 1;
+          this.value = Math.max(0, parseInt(this.value) - step);
+          syncFromSlider();
+        }
+      });
+    });
+
+    // === Initial render ===
+    updateAll();
+  </script>
+</body>
+</html>
